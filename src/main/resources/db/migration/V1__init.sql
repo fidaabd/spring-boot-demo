@@ -1,4 +1,3 @@
--- ===== TABLE MEDECIN =====
 CREATE TABLE medecin (
                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
                          nom VARCHAR(100) NOT NULL,
@@ -10,7 +9,6 @@ CREATE TABLE medecin (
                          actif BOOLEAN DEFAULT TRUE
 );
 
--- ===== TABLE PATIENT =====
 CREATE TABLE patient (
                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
                          cin VARCHAR(20) UNIQUE NOT NULL,
@@ -23,7 +21,6 @@ CREATE TABLE patient (
                          date_creation DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- ===== TABLE RENDEZ_VOUS =====
 CREATE TABLE rendez_vous (
                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
                              patient_id BIGINT NOT NULL,
@@ -36,7 +33,6 @@ CREATE TABLE rendez_vous (
                              FOREIGN KEY (medecin_id) REFERENCES medecin(id)
 );
 
--- ===== TABLE ORDONNANCE =====
 CREATE TABLE ordonnance (
                             id BIGINT AUTO_INCREMENT PRIMARY KEY,
                             rendez_vous_id BIGINT UNIQUE NOT NULL,
@@ -45,7 +41,6 @@ CREATE TABLE ordonnance (
                             FOREIGN KEY (rendez_vous_id) REFERENCES rendez_vous(id)
 );
 
--- ===== TABLE LIGNE_MEDICAMENT =====
 CREATE TABLE ligne_medicament (
                                   id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                   ordonnance_id BIGINT NOT NULL,
@@ -55,7 +50,6 @@ CREATE TABLE ligne_medicament (
                                   FOREIGN KEY (ordonnance_id) REFERENCES ordonnance(id)
 );
 
--- ===== TABLE UTILISATEUR (Spring Security) =====
 CREATE TABLE utilisateur (
                              id BIGINT AUTO_INCREMENT PRIMARY KEY,
                              username VARCHAR(50) UNIQUE NOT NULL,
