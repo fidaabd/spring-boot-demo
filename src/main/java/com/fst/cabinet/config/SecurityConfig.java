@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService() { //interface qui charge l'utilisateur depuis l base de donneees
         UserDetails admin = User.builder()
                 .username("admin")
                 .password("fida123")

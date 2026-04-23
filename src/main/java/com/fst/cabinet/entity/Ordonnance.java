@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "ordonnance")
-@Data
+@Data // lombok data genere automatiquement getters w setters w constructeurr
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -17,7 +17,7 @@ public class Ordonnance {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
+    @OneToOne //une ordonnance liee a un seul rdv
     @JoinColumn(name = "rendez_vous_id", nullable = false)
     private RendezVous rendezVous;
 
