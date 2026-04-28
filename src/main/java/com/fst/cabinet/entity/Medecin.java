@@ -2,7 +2,8 @@ package com.fst.cabinet.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.util.ArrayList;
+import java.util.List;
 @Entity
 @Table(name = "medecin")
 @Data
@@ -35,4 +36,12 @@ public class Medecin {
 
     @Column(name = "actif", nullable = false)
     private Boolean actif = true;
+
+    @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Formation> formations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "medecin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Experience> experiences = new ArrayList<>();
 }
