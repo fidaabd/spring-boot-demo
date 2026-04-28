@@ -1,6 +1,5 @@
 package com.fst.cabinet.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,14 +46,27 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
+                        // Ressources statiques
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+
+                        // Pages publiques sans login
+                        .requestMatchers("/public/**").permitAll()
+
+                        // Dashboards par rôle (ajout Sprint 3)
+                        .requestMatchers("/dashboard/admin").hasRole("ADMIN")
+                        .requestMatchers("/dashboard/medecin").hasAnyRole("ADMIN", "MEDECIN")
+                        .requestMatchers("/dashboard/secretaire").hasAnyRole("ADMIN", "SECRETAIRE")
+
+                        // Anciennes règles conservées
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/medecin/**").hasAnyRole("ADMIN", "MEDECIN")
+
+                        // Tout le reste nécessite d'être connecté
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard")
+                        .defaultSuccessUrl("/dashboard", true) // true ajouté Sprint 3
                         .permitAll()
                 )
                 .logout(logout -> logout
