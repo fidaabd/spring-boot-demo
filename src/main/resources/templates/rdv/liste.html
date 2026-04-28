@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste RDV</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .sidebar { min-height: 100vh; background: #2c3e50; }
+        .sidebar a {
+            color: #bdc3c7;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 2px 0;
+        }
+        .sidebar a:hover { background: #3498db; color: white; }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-3">
+            <h5 class="text-white mb-4">
+                <i class="bi bi-hospital"></i> Cabinet
+            </h5>
+            <a th:href="@{/dashboard}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a th:href="@{/patients}">
+                <i class="bi bi-people"></i> Patients
+            </a>
+            <a th:href="@{/medecins}">
+                <i class="bi bi-person-badge"></i> Médecins
+            </a>
+            <a th:href="@{/rdv/liste}">
+                <i class="bi bi-calendar3"></i> Liste RDV
+            </a>
+            <a th:href="@{/rdv/calendrier}">
+                <i class="bi bi-calendar-week"></i> Calendrier
+            </a>
+            <hr class="text-white">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit"
+                        class="btn btn-outline-light btn-sm w-100">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </form>
+        </div>
+
+        <!-- Contenu -->
+        <div class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-calendar3"></i> Liste des RDV</h2>
+                <a th:href="@{/rdv/nouveau}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Nouveau RDV
+                </a>
+            </div>
+
+            <!-- Filtres -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <select class="form-select">
+                                <option>Tous les statuts</option>
+                                <option>PLANIFIE</option>
+                                <option>CONFIRME</option>
+                                <option>ANNULE</option>
+                                <option>TERMINE</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="date" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100">
+                                <i class="bi bi-search"></i> Filtrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table RDV -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Date/Heure</th>
+                            <th>Patient</th>
+                            <th>Médecin</th>
+                            <th>Motif</th>
+                            <th>Durée</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="rdv : ${rdvList}">
+                            <td th:text="${#temporals.format(rdv.dateHeure, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:text="${rdv.patient.nom + ' ' + rdv.patient.prenom}"></td>
+                            <td th:text="${'Dr. ' + rdv.medecin.nom}"></td>
+                            <td th:text="${rdv.motif}"></td>
+                            <td th:text="${rdv.dureeMinutes + ' min'}"></td>
+                            <td>
+                                    <span th:class="${rdv.statut == T(com.fst.cabinet.entity.StatutRdv).PLANIFIE ? 'badge bg-warning' :
+                                                     rdv.statut == T(com.fst.cabinet.entity.StatutRdv).CONFIRME ? 'badge bg-success' :
+                                                     rdv.statut == T(com.fst.cabinet.entity.StatutRdv).ANNULE ? 'badge bg-danger' :
+                                                     'badge bg-secondary'}"
+                                          th:text="${rdv.statut}">
+                                    </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/rdv/modifier/{id}(id=${rdv.id})}"
+                                   class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/rdv/annuler/{id}(id=${rdv.id})}"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Annuler ce RDV ?')">
+                                    <i class="bi bi-x-circle"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
