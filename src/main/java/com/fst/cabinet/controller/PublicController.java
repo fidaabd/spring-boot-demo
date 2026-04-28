@@ -1,65 +1,93 @@
 package com.fst.cabinet.controller;
 
-import com.fst.cabinet.entity.Medecin;
+import com.fst.cabinet.dto.RdvPublicDto;
+import com.fst.cabinet.entity.Patient;
 import com.fst.cabinet.entity.RendezVous;
-import com.fst.cabinet.repository.ExperienceRepository;
-import com.fst.cabinet.repository.FormationRepository;
-import com.fst.cabinet.service.MedecinService;
-import com.fst.cabinet.service.RendezVousService;
+import com.fst.cabinet.entity.StatutRdv;
+import com.fst.cabinet.repository.MedecinRepository;
+import com.fst.cabinet.repository.PatientRepository;
+import com.fst.cabinet.repository.RendezVousRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 @RequestMapping("/public")
 @RequiredArgsConstructor
 public class PublicController {
 
-    private final MedecinService medecinService;
-    private final RendezVousService rendezVousService;
-    private final FormationRepository formationRepository;
-    private final ExperienceRepository experienceRepository;
+    private final PatientRepository patientRepository;
+    private final MedecinRepository medecinRepository;
+    private final RendezVousRepository rendezVousRepository;
 
-    // Liste de tous les médecins
-    @GetMapping("/medecins")
-    public String listeMedecins(Model model) {
-        model.addAttribute("medecins", medecinService.findAll());
+    @GetMapping("/accueil")
+    public String accueil() {
         return "public/accueil";
     }
 
-    // Profil d'un médecin avec formations et expériences
-    @GetMapping("/medecin/{id}")
-    public String profilMedecin(@PathVariable Long id, Model model) {
-        Medecin medecin = medecinService.findById(id);
-        model.addAttribute("medecin", medecin);
-        model.addAttribute("formations", formationRepository.findByMedecinId(id));
-        model.addAttribute("experiences", experienceRepository.findByMedecinId(id));
+    @GetMapping("/profil")
+    public String profil() {
         return "public/profil";
     }
 
-    // Formulaire de RDV en ligne
-    @GetMapping("/rdv/{medecinId}")
-    public String formulaireRdv(@PathVariable Long medecinId,
-                                @RequestParam(required = false)
-                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                Model model) {
-        if (date == null) date = LocalDate.now();
-        model.addAttribute("medecin", medecinService.findById(medecinId));
-        model.addAttribute("creneaux", rendezVousService.getCreneauxDisponibles(medecinId, date));
-        model.addAttribute("rdv", new RendezVous());
-        model.addAttribute("date", date);
+    @GetMapping("/rdv")
+    public String rdvForm(Model model) {
+        model.addAttribute("rdvDto", new RdvPublicDto());
         return "public/rdv";
     }
 
-    // Soumission du formulaire RDV
-    @PostMapping("/rdv/{medecinId}")
-    public String soumettreRdv(@PathVariable Long medecinId,
-                               @ModelAttribute RendezVous rdv) {
-        rdv.setMedecin(medecinService.findById(medecinId));
-        rendezVousService.prendreRdvEnLigne(rdv);
-        return "redirect:/public/medecin/" + medecinId + "?success";
+    @PostMapping("/rdv")
+    public String soumettreRdv(@ModelAttribute RdvPublicDto dto,
+                               Model model) {
+        try {
+            // 1. Chercher si patient existe déjà par téléphone
+            Patient patient = patientRepository
+                    .findByNomContainingIgnoreCaseOrPrenomContainingIgnoreCase(
+                            dto.getNom(), dto.getPrenom())
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+
+            // 2. Si patient n'existe pas → créer nouveau
+            if (patient == null) {
+                patient = new Patient();
+                patient.setNom(dto.getNom());
+                patient.setPrenom(dto.getPrenom());
+                patient.setTelephone(dto.getTelephone());
+                patient.setEmail(dto.getEmail());
+                patient.setCin("TEMP-" + System.currentTimeMillis());
+                patient.setDateNaissance(java.time.LocalDate.of(2000, 1, 1));
+                patient = patientRepository.save(patient);
+            }
+
+            // 3. Créer le RDV
+            RendezVous rdv = new RendezVous();
+            rdv.setPatient(patient);
+            rdv.setMedecin(medecinRepository.findAll().get(0));
+            rdv.setMotif(dto.getMotif());
+            rdv.setStatut(StatutRdv.EN_ATTENTE);
+            rdv.setDureeMinutes(30);
+
+            // Parser la date
+            DateTimeFormatter formatter = DateTimeFormatter
+                    .ofPattern("yyyy-MM-dd'T'HH:mm");
+            rdv.setDateHeure(LocalDateTime.parse(dto.getDateHeure(), formatter));
+
+            rendezVousRepository.save(rdv);
+
+            return "redirect:/public/rdv-confirme";
+
+        } catch (Exception e) {
+            model.addAttribute("erreur", "Erreur lors de la prise de RDV !");
+            return "public/rdv";
+        }
+    }
+
+    @GetMapping("/rdv-confirme")
+    public String rdvConfirme() {
+        return "public/rdv-confirme";
     }
 }

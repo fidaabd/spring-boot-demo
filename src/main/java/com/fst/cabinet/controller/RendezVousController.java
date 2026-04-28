@@ -15,53 +15,71 @@ import org.springframework.web.bind.annotation.*;
 public class RendezVousController {
 
     private final RendezVousService rendezVousService;
-    private final MedecinService medecinService;
     private final PatientService patientService;
+    private final MedecinService medecinService;
 
-    // Liste tous les RDV
-    @GetMapping
+    @GetMapping("/liste")
     public String liste(Model model) {
         model.addAttribute("rdvList", rendezVousService.findAll());
         return "rdv/liste";
     }
 
-    // Formulaire nouveau RDV
+    @GetMapping("/calendrier")
+    public String calendrier(Model model) {
+        // Envoyer les RDV de la semaine au calendrier
+        model.addAttribute("rdvSemaine", rendezVousService.findSemaine());
+        return "rdv/calendrier";
+    }
+
     @GetMapping("/nouveau")
     public String nouveauForm(Model model) {
-        model.addAttribute("rdv", new RendezVous());
-        model.addAttribute("medecins", medecinService.findAll());
+        model.addAttribute("rendezVous", new RendezVous());
         model.addAttribute("patients", patientService.findAll());
+        model.addAttribute("medecins", medecinService.findAll());
         return "rdv/formulaire";
     }
 
-    // Sauvegarder nouveau RDV
     @PostMapping("/nouveau")
-    public String sauvegarder(@ModelAttribute RendezVous rdv) {
-        rendezVousService.save(rdv);
-        return "redirect:/rdv";
+    public String sauvegarder(@ModelAttribute RendezVous rdv,
+                              Model model) {
+        try {
+            rendezVousService.save(rdv);
+            return "redirect:/rdv/liste";
+        } catch (RuntimeException e) {
+            model.addAttribute("erreur", e.getMessage());
+            model.addAttribute("patients", patientService.findAll());
+            model.addAttribute("medecins", medecinService.findAll());
+            return "rdv/formulaire";
+        }
     }
 
-    // Formulaire modifier RDV
     @GetMapping("/modifier/{id}")
     public String modifierForm(@PathVariable Long id, Model model) {
-        model.addAttribute("rdv", rendezVousService.findById(id));
-        model.addAttribute("medecins", medecinService.findAll());
+        model.addAttribute("rendezVous", rendezVousService.findById(id));
         model.addAttribute("patients", patientService.findAll());
+        model.addAttribute("medecins", medecinService.findAll());
         return "rdv/formulaire";
     }
 
-    // Sauvegarder modification
     @PostMapping("/modifier/{id}")
-    public String modifier(@PathVariable Long id, @ModelAttribute RendezVous rdv) {
-        rdv.setId(id);
-        rendezVousService.save(rdv);
-        return "redirect:/rdv";
+    public String modifier(@PathVariable Long id,
+                           @ModelAttribute RendezVous rdv,
+                           Model model) {
+        try {
+            rdv.setId(id);
+            rendezVousService.save(rdv);
+            return "redirect:/rdv/liste";
+        } catch (RuntimeException e) {
+            model.addAttribute("erreur", e.getMessage());
+            model.addAttribute("patients", patientService.findAll());
+            model.addAttribute("medecins", medecinService.findAll());
+            return "rdv/formulaire";
+        }
     }
 
-    // Annuler RDV
     @GetMapping("/annuler/{id}")
     public String annuler(@PathVariable Long id) {
         rendezVousService.annuler(id);
-        return "redirect:/rdv";
+        return "redirect:/rdv/liste";
     }
 }

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Médecin</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: #1a5276;
+        }
+        .sidebar a {
+            color: #aed6f1;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 2px 0;
+        }
+        .sidebar a:hover {
+            background: #2980b9;
+            color: white;
+        }
+        .card-stat {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .rdv-item {
+            border-left: 4px solid #2980b9;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 0 10px 10px 0;
+        }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Sidebar Médecin -->
+        <div class="col-md-2 sidebar p-3">
+            <h5 class="text-white mb-4">
+                <i class="bi bi-person-badge"></i> Médecin
+            </h5>
+            <a th:href="@{/dashboard/medecin}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a th:href="@{/rdv/mes-rdv}">
+                <i class="bi bi-calendar3"></i> Mes RDV
+            </a>
+            <a th:href="@{/rdv/calendrier}">
+                <i class="bi bi-calendar-week"></i> Calendrier
+            </a>
+            <a th:href="@{/patients}">
+                <i class="bi bi-people"></i> Mes Patients
+            </a>
+            <hr class="text-white">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit"
+                        class="btn btn-outline-light btn-sm w-100">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </form>
+        </div>
+
+        <!-- Contenu Médecin -->
+        <div class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-speedometer2"></i> Mon Dashboard</h2>
+                <span class="badge bg-primary fs-6">
+                    <i class="bi bi-person-badge"></i> Médecin
+                </span>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="row mb-4 g-3">
+                <div class="col-md-4">
+                    <div class="card card-stat p-3 bg-primary text-white">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6>RDV Aujourd'hui</h6>
+                                <h2 th:text="${#lists.size(rdvAujourdhui)}">0</h2>
+                            </div>
+                            <i class="bi bi-calendar-check fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat p-3 bg-success text-white">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6>RDV Semaine</h6>
+                                <h2 th:text="${#lists.size(rdvSemaine)}">0</h2>
+                            </div>
+                            <i class="bi bi-calendar-week fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-stat p-3 bg-info text-white">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6>Total Patients</h6>
+                                <h2 th:text="${totalPatients}">0</h2>
+                            </div>
+                            <i class="bi bi-people fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RDV du jour -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-day"></i> Mes RDV d'aujourd'hui
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(rdvAujourdhui)}"
+                         class="text-center text-muted py-3">
+                        Aucun rendez-vous aujourd'hui
+                    </div>
+                    <div th:each="rdv : ${rdvAujourdhui}" class="rdv-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="mb-0"
+                                    th:text="${rdv.patient.nom + ' ' + rdv.patient.prenom}">
+                                </h6>
+                                <small class="text-muted"
+                                       th:text="${rdv.motif}"></small>
+                            </div>
+                            <div class="text-end">
+                                <strong th:text="${#temporals.format(rdv.dateHeure, 'HH:mm')}"></strong>
+                                <br>
+                                <span class="badge bg-primary"
+                                      th:text="${rdv.statut}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

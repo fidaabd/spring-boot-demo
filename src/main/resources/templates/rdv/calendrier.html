@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendrier RDV</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .sidebar { min-height: 100vh; background: #2c3e50; }
+        .sidebar a {
+            color: #bdc3c7;
+            text-decoration: none;
+            display: block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 2px 0;
+        }
+        .sidebar a:hover { background: #3498db; color: white; }
+        .creneau-libre {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 3px 0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .creneau-libre:hover { background: #28a745; color: white; }
+        .creneau-occupe {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+            border-radius: 8px;
+            padding: 8px;
+            margin: 3px 0;
+            font-size: 13px;
+        }
+        .day-header {
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+        }
+        .day-column {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .day-body { padding: 10px; min-height: 300px; }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-3">
+            <h5 class="text-white mb-4">
+                <i class="bi bi-hospital"></i> Cabinet
+            </h5>
+            <a th:href="@{/dashboard}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a th:href="@{/patients}">
+                <i class="bi bi-people"></i> Patients
+            </a>
+            <a th:href="@{/medecins}">
+                <i class="bi bi-person-badge"></i> Médecins
+            </a>
+            <a th:href="@{/rdv/liste}">
+                <i class="bi bi-calendar3"></i> Liste RDV
+            </a>
+            <a th:href="@{/rdv/calendrier}">
+                <i class="bi bi-calendar-week"></i> Calendrier
+            </a>
+            <hr class="text-white">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit"
+                        class="btn btn-outline-light btn-sm w-100">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                </button>
+            </form>
+        </div>
+
+        <!-- Contenu Calendrier -->
+        <div class="col-md-10 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-calendar-week"></i> Calendrier des RDV</h2>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-success p-2">🟢 Disponible</span>
+                    <span class="badge bg-danger p-2">🔴 Occupé</span>
+                    <a th:href="@{/rdv/nouveau}"
+                       class="btn btn-primary">
+                        <i class="bi bi-plus"></i> Nouveau RDV
+                    </a>
+                </div>
+            </div>
+
+            <!-- Navigation semaine -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <button class="btn btn-outline-secondary">
+                    <i class="bi bi-chevron-left"></i> Semaine précédente
+                </button>
+                <h5 class="mb-0" id="semaineTitre">Semaine actuelle</h5>
+                <button class="btn btn-outline-secondary">
+                    Semaine suivante <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Calendrier hebdomadaire -->
+            <div class="row g-2" id="calendrier">
+                <!-- Lundi -->
+                <div class="col">
+                    <div class="day-column">
+                        <div class="day-header">
+                            <strong>Lundi</strong><br>
+                            <small id="dateLundi"></small>
+                        </div>
+                        <div class="day-body" id="creneauxLundi"></div>
+                    </div>
+                </div>
+                <!-- Mardi -->
+                <div class="col">
+                    <div class="day-column">
+                        <div class="day-header">
+                            <strong>Mardi</strong><br>
+                            <small id="dateMardi"></small>
+                        </div>
+                        <div class="day-body" id="creneauxMardi"></div>
+                    </div>
+                </div>
+                <!-- Mercredi -->
+                <div class="col">
+                    <div class="day-column">
+                        <div class="day-header">
+                            <strong>Mercredi</strong><br>
+                            <small id="dateMercredi"></small>
+                        </div>
+                        <div class="day-body" id="creneauxMercredi"></div>
+                    </div>
+                </div>
+                <!-- Jeudi -->
+                <div class="col">
+                    <div class="day-column">
+                        <div class="day-header">
+                            <strong>Jeudi</strong><br>
+                            <small id="dateJeudi"></small>
+                        </div>
+                        <div class="day-body" id="creneauxJeudi"></div>
+                    </div>
+                </div>
+                <!-- Vendredi -->
+                <div class="col">
+                    <div class="day-column">
+                        <div class="day-header">
+                            <strong>Vendredi</strong><br>
+                            <small id="dateVendredi"></small>
+                        </div>
+                        <div class="day-body" id="creneauxVendredi"></div>
+                    </div>
+                </div>
+                <!-- Samedi -->
+                <div class="col">
+                    <div class="day-column">
+                        <div class="day-header">
+                            <strong>Samedi</strong><br>
+                            <small id="dateSamedi"></small>
+                        </div>
+                        <div class="day-body" id="creneauxSamedi"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Créneaux occupés (simulation)
+    const rdvOccupes = {
+        0: ["09:00", "10:30"],
+        1: ["09:30", "14:00"],
+        2: ["10:00"],
+        3: ["09:00", "11:00", "15:00"],
+        4: ["09:30", "14:30"],
+        5: ["10:00"]
+    };
+
+    const heures = ["09:00","09:30","10:00","10:30","11:00","11:30",
+        "14:00","14:30","15:00","15:30","16:00","16:30"];
+
+    const jours = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+    const ids = ["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+
+    function getMonday(d) {
+        d = new Date(d);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    }
+
+    function formatDate(date) {
+        return date.getDate() + '/' + (date.getMonth()+1);
+    }
+
+    function afficherCalendrier() {
+        const lundi = getMonday(new Date());
+
+        ids.forEach((id, index) => {
+            const date = new Date(lundi);
+            date.setDate(lundi.getDate() + index);
+
+            // Afficher la date
+            document.getElementById('date' + id).textContent = formatDate(date);
+
+            // Afficher les créneaux
+            const occupes = rdvOccupes[index] || [];
+            let html = '';
+
+            // Samedi seulement matin
+            const heuresDuJour = index === 5 ?
+                heures.filter(h => h < "12:00") : heures;
+
+            heuresDuJour.forEach(heure => {
+                if (occupes.includes(heure)) {
+                    html += `
+                        <div class="creneau-occupe">
+                            <i class="bi bi-x-circle"></i>
+                            <strong>${heure}</strong><br>
+                            <small>Occupé</small>
+                        </div>`;
+                } else {
+                    html += `
+                        <div class="creneau-libre"
+                             onclick="prendreRdv('${formatDate(date)}', '${heure}')">
+                            <i class="bi bi-check-circle"></i>
+                            <strong>${heure}</strong><br>
+                            <small>Disponible</small>
+                        </div>`;
+                }
+            });
+
+            document.getElementById('creneaux' + id).innerHTML = html;
+        });
+    }
+
+    function prendreRdv(date, heure) {
+        window.location.href = `/rdv/nouveau?date=${date}&heure=${heure}`;
+    }
+
+    // Afficher au chargement
+    afficherCalendrier();
+</script>
+</body>
+</html>

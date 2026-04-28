@@ -4,5 +4,6 @@ public enum StatutRdv {
     PLANIFIE,
     CONFIRME,
     ANNULE,
-    TERMINE
+    TERMINE,
+    EN_ATTENTE
 }
