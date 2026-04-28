@@ -71,4 +71,34 @@ public class RendezVousService {
         LocalDateTime fin = debut.plusDays(7);
         return rendezVousRepository.findByDateHeureBetween(debut, fin);
     }
+    // Créneaux disponibles pour un médecin à une date donnée
+    public List<LocalDateTime> getCreneauxDisponibles(Long medecinId, java.time.LocalDate date) {
+        List<LocalDateTime> tousLesCreneaux = new java.util.ArrayList<>();
+
+        // Créneaux de 9h à 17h toutes les 30 minutes
+        LocalDateTime debut = date.atTime(9, 0);
+        LocalDateTime fin = date.atTime(17, 0);
+
+        while (debut.isBefore(fin)) {
+            tousLesCreneaux.add(debut);
+            debut = debut.plusMinutes(30);
+        }
+
+        // Enlever les créneaux déjà pris
+        List<RendezVous> rdvExistants = rendezVousRepository.findByMedecinId(medecinId);
+        tousLesCreneaux.removeIf(creneau ->
+                rdvExistants.stream().anyMatch(rdv ->
+                        rdv.getDateHeure().equals(creneau) &&
+                                rdv.getStatut() != StatutRdv.ANNULE
+                )
+        );
+
+        return tousLesCreneaux;
+    }
+
+    // Prendre RDV en ligne (sans être connecté)
+    public RendezVous prendreRdvEnLigne(RendezVous rdv) {
+        rdv.setStatut(StatutRdv.PLANIFIE);
+        return save(rdv); // utilise la méthode save existante qui vérifie les chevauchements
+    }
 }
