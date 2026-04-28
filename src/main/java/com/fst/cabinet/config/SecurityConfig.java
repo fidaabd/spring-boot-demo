@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -18,67 +18,46 @@ public class SecurityConfig {
 
     private final UtilisateurRepository utilisateurRepository;
 
-    // 🔐 Charger les utilisateurs depuis la base MySQL
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
             var user = utilisateurRepository.findByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé : " + username));
-
             return User.builder()
                     .username(user.getUsername())
                     .password(user.getPassword())
-                    .roles(user.getRole()) // ADMIN / MEDECIN / SECRETAIRE
+                    .roles(user.getRole())
                     .build();
         };
     }
 
-    // 🔑 Cryptage mot de passe (BCrypt)
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance();
     }
 
-    // 🛡️ Règles de sécurité + accès par rôles
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
                 .authorizeHttpRequests(auth -> auth
-
-                        // fichiers statiques accessibles sans login
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-
-                        // accès ADMIN uniquement
+                        .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        // accès MEDECIN ou ADMIN
                         .requestMatchers("/medecin/**").hasAnyRole("ADMIN", "MEDECIN")
-
-                        // accès SECRETAIRE ou ADMIN
-                        .requestMatchers("/patients/**", "/medecins/**")
-                        .hasAnyRole("ADMIN", "SECRETAIRE")
-
-                        // dashboard pour tous les utilisateurs connectés
-                        .requestMatchers("/", "/dashboard").authenticated()
-
-                        // tout le reste nécessite login
+                        .requestMatchers("/dashboard/admin").hasRole("ADMIN")
+                        .requestMatchers("/dashboard/medecin").hasAnyRole("ADMIN", "MEDECIN")
+                        .requestMatchers("/dashboard/secretaire").hasAnyRole("ADMIN", "SECRETAIRE")
                         .anyRequest().authenticated()
                 )
-
-                // page login personnalisée
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
-
-                // logout
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
-
         return http.build();
     }
 }
