@@ -25,5 +25,6 @@ public class Utilisateur {
     private String role;
 
     @Column(name = "actif", nullable = false)
+    @Builder.Default
     private Boolean actif = true;
 }

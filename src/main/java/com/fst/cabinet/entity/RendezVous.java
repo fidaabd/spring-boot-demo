@@ -28,10 +28,12 @@ public class RendezVous {
     private LocalDateTime dateHeure;
 
     @Column(name = "duree_minutes")
+    @Builder.Default
     private int dureeMinutes = 30;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", length = 20)
+    @Builder.Default
     private StatutRdv statut = StatutRdv.PLANIFIE;
 
     @Column(name = "motif", columnDefinition = "TEXT")
