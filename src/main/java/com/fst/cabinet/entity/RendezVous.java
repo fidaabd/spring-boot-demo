@@ -16,7 +16,7 @@ public class RendezVous {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne//un rdv appartient l un seul patient w medecin
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 

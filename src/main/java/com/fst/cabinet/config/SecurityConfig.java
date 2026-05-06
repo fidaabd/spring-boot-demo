@@ -1,5 +1,7 @@
 package com.fst.cabinet.config;
 
+import com.fst.cabinet.repository.UtilisateurRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,34 +9,26 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final UtilisateurRepository utilisateurRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password("fida123")
-                .roles("ADMIN")
-                .build();
-
-        UserDetails secretaire = User.builder()
-                .username("secretaire")
-                .password("fida123")
-                .roles("SECRETAIRE")
-                .build();
-
-        UserDetails medecin = User.builder()
-                .username("docteur1")
-                .password("fida123")
-                .roles("MEDECIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(admin, secretaire, medecin);
+        return username -> {
+            var user = utilisateurRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé : " + username));
+            return User.builder()
+                    .username(user.getUsername())
+                    .password(user.getPassword())
+                    .roles(user.getRole())
+                    .build();
+        };
     }
 
     @Bean
@@ -46,27 +40,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        // Ressources statiques
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-
-                        // Pages publiques sans login
                         .requestMatchers("/public/**").permitAll()
-
-                        // Dashboards par rôle (ajout Sprint 3)
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/medecin/**").hasAnyRole("ADMIN", "MEDECIN")
                         .requestMatchers("/dashboard/admin").hasRole("ADMIN")
                         .requestMatchers("/dashboard/medecin").hasAnyRole("ADMIN", "MEDECIN")
                         .requestMatchers("/dashboard/secretaire").hasAnyRole("ADMIN", "SECRETAIRE")
-
-                        // Anciennes règles conservées
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/medecin/**").hasAnyRole("ADMIN", "MEDECIN")
-
-                        // Tout le reste nécessite d'être connecté
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/dashboard", true) // true ajouté Sprint 3
+                        .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
                 .logout(logout -> logout

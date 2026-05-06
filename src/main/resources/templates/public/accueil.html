@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cabinet Médical</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 80px 0;
+        }
+        .navbar-custom {
+            background: #2c3e50;
+        }
+        .btn-rdv {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 30px;
+        }
+        .btn-rdv:hover {
+            background: #c0392b;
+            color: white;
+        }
+        .card-service {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .card-service:hover {
+            transform: translateY(-5px);
+        }
+        .section-title {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold" href="#">
+            <i class="bi bi-hospital"></i> Cabinet Médical
+        </a>
+        <div class="ms-auto d-flex gap-2">
+            <a th:href="@{/public/profil}"
+               class="btn btn-outline-light">
+                <i class="bi bi-person-badge"></i> Notre Médecin
+            </a>
+            <a th:href="@{/public/rdv}"
+               class="btn btn-danger">
+                <i class="bi bi-calendar-plus"></i> Prendre RDV
+            </a>
+            <a th:href="@{/login}"
+               class="btn btn-light">
+                <i class="bi bi-lock"></i> Connexion
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            Bienvenue au Cabinet Médical
+        </h1>
+        <p class="lead mb-4">
+            Des soins de qualité pour votre santé et votre bien-être
+        </p>
+        <a th:href="@{/public/rdv}" class="btn btn-rdv">
+            <i class="bi bi-calendar-plus"></i> Prendre un Rendez-vous
+        </a>
+    </div>
+</div>
+
+<!-- Services -->
+<div class="container my-5">
+    <h2 class="text-center section-title mb-4">Nos Services</h2>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card card-service p-4 text-center">
+                <i class="bi bi-heart-pulse fs-1 text-danger mb-3"></i>
+                <h5>Consultation Générale</h5>
+                <p class="text-muted">Diagnostic et suivi médical complet</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-service p-4 text-center">
+                <i class="bi bi-clipboard2-pulse fs-1 text-primary mb-3"></i>
+                <h5>Ordonnances</h5>
+                <p class="text-muted">Prescriptions médicales personnalisées</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-service p-4 text-center">
+                <i class="bi bi-calendar-check fs-1 text-success mb-3"></i>
+                <h5>Rendez-vous en ligne</h5>
+                <p class="text-muted">Réservez votre créneau facilement</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Horaires -->
+<div class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center section-title mb-4">Horaires d'ouverture</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Lundi — Vendredi</strong></td>
+                                <td class="text-end text-success">09h00 — 17h00</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Samedi</strong></td>
+                                <td class="text-end text-success">09h00 — 13h00</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Dimanche</strong></td>
+                                <td class="text-end text-danger">Fermé</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact -->
+<div class="container my-5">
+    <h2 class="text-center section-title mb-4">Contact</h2>
+    <div class="row justify-content-center g-4">
+        <div class="col-md-3 text-center">
+            <i class="bi bi-telephone fs-1 text-primary"></i>
+            <p class="mt-2"><strong>71 000 001</strong></p>
+        </div>
+        <div class="col-md-3 text-center">
+            <i class="bi bi-envelope fs-1 text-primary"></i>
+            <p class="mt-2"><strong>contact@cabinet.tn</strong></p>
+        </div>
+        <div class="col-md-3 text-center">
+            <i class="bi bi-geo-alt fs-1 text-primary"></i>
+            <p class="mt-2"><strong>Tunis, Tunisie</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-3">
+    <p class="mb-0">© 2025 Cabinet Médical — Tous droits réservés</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

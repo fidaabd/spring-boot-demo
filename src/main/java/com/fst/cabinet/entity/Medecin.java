@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Medecin {
-
+// cle primaire auto incrementee
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
